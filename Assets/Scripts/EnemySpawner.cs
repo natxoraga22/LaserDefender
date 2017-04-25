@@ -3,11 +3,11 @@ using System.Collections;
 
 public class EnemySpawner : MonoBehaviour {
 
-	public GameObject blackEnemy;
+	public GameObject blackEnemyPrefab;
 
 	public float formationSpeed = 1f;
 
-	private bool isLeftDirection = true;
+	private bool isMovingLeft = true;
 	private float minXPosition;
 	private float maxXPosition;
 
@@ -50,7 +50,7 @@ public class EnemySpawner : MonoBehaviour {
  
 	void SpawnStartingEnemies () {
 		foreach (Transform child in this.transform) {
-			Instantiate (blackEnemy, child.position, Quaternion.identity, child);
+			Instantiate (blackEnemyPrefab, child.position, Quaternion.identity, child);
 		}
 	}
 
@@ -61,15 +61,15 @@ public class EnemySpawner : MonoBehaviour {
 	void UpdateFormationPosition () {
 		// Move the formation to the left until it reaches min X, change direction until reaching max X, change direction again, etc.
 		float newXPosition = this.transform.position.x;
-		if (isLeftDirection) {
+		if (isMovingLeft) {
 			newXPosition = this.transform.position.x - formationSpeed * Time.deltaTime;
 			newXPosition = Mathf.Clamp (newXPosition, minXPosition, maxXPosition);
-			if (newXPosition <= minXPosition) isLeftDirection = false;
+			if (newXPosition <= minXPosition) isMovingLeft = false;
 		} 
 		else {
 			newXPosition = this.transform.position.x + formationSpeed * Time.deltaTime;
 			newXPosition = Mathf.Clamp (newXPosition, minXPosition, maxXPosition);
-			if (newXPosition >= maxXPosition) isLeftDirection = true;
+			if (newXPosition >= maxXPosition) isMovingLeft = true;
 		}
 
 		this.transform.position = new Vector3 (newXPosition, this.transform.position.y, this.transform.position.z);
