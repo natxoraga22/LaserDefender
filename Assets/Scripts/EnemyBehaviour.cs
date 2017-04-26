@@ -6,14 +6,18 @@ public class EnemyBehaviour : MonoBehaviour {
 	public GameObject enemyLaserPrefab;
 
 	public int health = 1;
+	public int scoreValue = 100;
 	public float enemyLaserSpeed = 10f;
 	public float enemyLaserFireRate = 0.2f;
 
 	private SpriteRenderer spriteRenderer;
 
+	private ScoreKeeper scoreKeeper;
+
 
 	void Start () {
 		spriteRenderer = GetComponent<SpriteRenderer> ();
+		scoreKeeper = GameObject.FindObjectOfType<ScoreKeeper> ();
 	}
 
 	void Update () {
@@ -49,6 +53,7 @@ public class EnemyBehaviour : MonoBehaviour {
 		// Handle the hit to know if the enemy dies
 		health -= projectile.GetDamage();
 		if (health <= 0) {
+			scoreKeeper.IncrementScore (scoreValue);
 			Destroy (this.gameObject);
 		}
 	}
