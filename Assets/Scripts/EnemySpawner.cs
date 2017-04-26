@@ -5,7 +5,7 @@ public class EnemySpawner : MonoBehaviour {
 
 	public GameObject blackEnemyPrefab;
 
-	public float formationSpeed = 1f;
+	public float formationSpeed = 2f;
 
 	private bool isMovingLeft = true;
 	private float minXPosition;

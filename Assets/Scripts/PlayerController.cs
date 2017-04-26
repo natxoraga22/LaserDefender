@@ -5,9 +5,12 @@ public class PlayerController : MonoBehaviour {
 
 	public GameObject playerLaserPrefab;
 
+	public int health = 3;
 	public float playerSpeed = 12f;
 	public float playerLaserSpeed = 20f;
 	public float playerLaserFireRate = 0.2f;
+
+	private LevelManager levelManager;
 
 	private SpriteRenderer spriteRenderer;
 	private float minXPosition;
@@ -15,6 +18,7 @@ public class PlayerController : MonoBehaviour {
 
 
 	void Start () {
+		levelManager = GameObject.FindObjectOfType<LevelManager> ();
 		spriteRenderer = GetComponent<SpriteRenderer> ();
 		ComputeXPositionLimits ();
 	}
@@ -59,11 +63,30 @@ public class PlayerController : MonoBehaviour {
 	void ShotLaser () {
 		// Instantiate the laser
 		GameObject playerLaser = (GameObject) Instantiate (playerLaserPrefab, this.transform.position, Quaternion.identity);
-		float yOffset = spriteRenderer.bounds.size.y / 2f + playerLaser.GetComponent<SpriteRenderer> ().bounds.size.y / 2f;
+		// TODO Remove the "+ 0.1f"
+		float yOffset = spriteRenderer.bounds.size.y / 2f + playerLaser.GetComponent<SpriteRenderer> ().bounds.size.y / 2f + 0.1f;
 		playerLaser.transform.position += new Vector3 (0f, yOffset, 0f);
 
 		// Set the laser speed
 		playerLaser.GetComponent<Rigidbody2D> ().velocity = new Vector2(0f, playerLaserSpeed);
+	}
+
+	void OnTriggerEnter2D (Collider2D collider) {
+		Projectile projectile = collider.gameObject.GetComponent<Projectile> ();
+		if (projectile) {
+			HandleHit (projectile);
+		}
+	}
+
+	void HandleHit (Projectile projectile) {
+		// Message the projectile
+		projectile.Hit ();
+
+		// Handle the hit to know if we die
+		health -= projectile.GetDamage();
+		if (health <= 0) {
+			levelManager.LoadLevel ("Lose");
+		}
 	}
 
 }
