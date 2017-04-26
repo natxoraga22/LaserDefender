@@ -63,9 +63,8 @@ public class PlayerController : MonoBehaviour {
 	void ShotLaser () {
 		// Instantiate the laser
 		GameObject playerLaser = (GameObject) Instantiate (playerLaserPrefab, this.transform.position, Quaternion.identity);
-		// TODO Remove the "+ 0.1f"
-		float yOffset = spriteRenderer.bounds.size.y / 2f + playerLaser.GetComponent<SpriteRenderer> ().bounds.size.y / 2f + 0.1f;
-		playerLaser.transform.position += new Vector3 (0f, yOffset, 0f);
+		float yOffset = spriteRenderer.bounds.size.y / 2f + playerLaser.GetComponent<SpriteRenderer> ().bounds.size.y / 2f;
+		playerLaser.transform.position += new Vector3 (0f, yOffset, 1f);	// Player projectiles z = 1f
 
 		// Set the laser speed
 		playerLaser.GetComponent<Rigidbody2D> ().velocity = new Vector2(0f, playerLaserSpeed);

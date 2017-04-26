@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class EnemySpawner : MonoBehaviour {
+public class EnemyFormationController : MonoBehaviour {
 
 	public GameObject blackEnemyPrefab;
 
 	public float formationSpeed = 2f;
+	public float delayBetweenSpawns = 0.5f;
 
 	private bool isMovingLeft = true;
 	private float minXPosition;
@@ -13,7 +14,13 @@ public class EnemySpawner : MonoBehaviour {
 
 
 	void Start () {
-		SpawnStartingEnemies ();
+		SpawnFullFormation ();
+	}
+
+	void SpawnFullFormation () {
+		foreach (Transform child in this.transform) {
+			Instantiate (blackEnemyPrefab, child.position, Quaternion.identity, child);
+		}
 		ComputeXPositionLimits ();	// Needs spawned enemies!!
 	}
 
@@ -30,9 +37,11 @@ public class EnemySpawner : MonoBehaviour {
 	float GetFormationLeftDistance () {
 		float formationMinX = this.transform.position.x;
 		foreach (Transform enemyPosition in this.transform) {
-			Transform enemy = enemyPosition.GetChild (0);
-			float enemyMinX = enemy.position.x - enemy.GetComponent<SpriteRenderer> ().bounds.size.x / 2f;
-			if (enemyMinX < formationMinX) formationMinX = enemyMinX;
+			if (enemyPosition.childCount > 0) {
+				Transform enemy = enemyPosition.GetChild (0);
+				float enemyMinX = enemy.position.x - enemy.GetComponent<SpriteRenderer> ().bounds.size.x / 2f;
+				if (enemyMinX < formationMinX) formationMinX = enemyMinX;
+			}
 		}
 		return Mathf.Abs(this.transform.position.x - formationMinX);
 	}
@@ -41,21 +50,21 @@ public class EnemySpawner : MonoBehaviour {
 	float GetFormationRightDistance () {
 		float formationMaxX = this.transform.position.x;
 		foreach (Transform enemyPosition in this.transform) {
-			Transform enemy = enemyPosition.GetChild (0);
-			float enemyMaxX = enemy.position.x + enemy.GetComponent<SpriteRenderer> ().bounds.size.x / 2f;
-			if (enemyMaxX > formationMaxX) formationMaxX = enemyMaxX;
+			if (enemyPosition.childCount > 0) {
+				Transform enemy = enemyPosition.GetChild (0);
+				float enemyMaxX = enemy.position.x + enemy.GetComponent<SpriteRenderer> ().bounds.size.x / 2f;
+				if (enemyMaxX > formationMaxX) formationMaxX = enemyMaxX;
+			}
 		}
 		return Mathf.Abs(formationMaxX - this.transform.position.x);
-	}
- 
-	void SpawnStartingEnemies () {
-		foreach (Transform child in this.transform) {
-			Instantiate (blackEnemyPrefab, child.position, Quaternion.identity, child);
-		}
 	}
 
 	void Update () {
 		UpdateFormationPosition ();
+
+		if (AllMembersAreDead ()) {
+			SpawnUntilFormationIsFull ();
+		}
 	}
 
 	void UpdateFormationPosition () {
@@ -73,6 +82,32 @@ public class EnemySpawner : MonoBehaviour {
 		}
 
 		this.transform.position = new Vector3 (newXPosition, this.transform.position.y, this.transform.position.z);
+	}
+
+	bool AllMembersAreDead () {
+		foreach (Transform enemyPosition in this.transform) {
+			if (enemyPosition.childCount > 0) return false;
+		}
+		return true;
+	}
+
+	void SpawnUntilFormationIsFull () {
+		Transform freePosition = GetNextFreePosition ();
+		if (freePosition) {
+			Instantiate (blackEnemyPrefab, freePosition.position, Quaternion.identity, freePosition);
+			ComputeXPositionLimits ();	// Needs spawned enemies!!
+		}
+		if (GetNextFreePosition ()) {
+			Invoke ("SpawnUntilFormationIsFull", delayBetweenSpawns);
+		}
+	}
+
+	// TODO The next free position should be random!!
+	Transform GetNextFreePosition () {
+		foreach (Transform enemyPosition in this.transform) {
+			if (enemyPosition.childCount == 0) return enemyPosition;
+		}
+		return null;
 	}
 
 }

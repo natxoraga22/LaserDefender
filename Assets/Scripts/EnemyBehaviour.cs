@@ -28,9 +28,8 @@ public class EnemyBehaviour : MonoBehaviour {
 	void ShotLaser () {
 		// Instantiate the laser
 		GameObject enemyLaser = (GameObject) Instantiate (enemyLaserPrefab, this.transform.position, Quaternion.identity);
-		// TODO Remove the "+ 0.1f"
-		float yOffset = spriteRenderer.bounds.size.y / 2f + enemyLaser.GetComponent<SpriteRenderer> ().bounds.size.y / 2f + 0.1f;
-		enemyLaser.transform.position += new Vector3 (0f, -yOffset, 0f);
+		float yOffset = spriteRenderer.bounds.size.y / 2f + enemyLaser.GetComponent<SpriteRenderer> ().bounds.size.y / 2f;
+		enemyLaser.transform.position += new Vector3 (0f, -yOffset, 2f);	// Enemy projectiles z = 2f
 
 		// Set the laser speed
 		enemyLaser.GetComponent<Rigidbody2D> ().velocity = new Vector2(0f, -enemyLaserSpeed);
