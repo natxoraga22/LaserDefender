@@ -10,6 +10,8 @@ public class PlayerController : MonoBehaviour {
 	public float playerLaserSpeed = 20f;
 	public float playerLaserFireRate = 0.2f;
 
+	public AudioClip laserSound;
+
 	private LevelManager levelManager;
 
 	private SpriteRenderer spriteRenderer;
@@ -64,10 +66,13 @@ public class PlayerController : MonoBehaviour {
 		// Instantiate the laser
 		GameObject playerLaser = (GameObject) Instantiate (playerLaserPrefab, this.transform.position, Quaternion.identity);
 		float yOffset = spriteRenderer.bounds.size.y / 2f + playerLaser.GetComponent<SpriteRenderer> ().bounds.size.y / 2f;
-		playerLaser.transform.position += new Vector3 (0f, yOffset, 1f);	// Player projectiles z = 1f
+		playerLaser.transform.position += new Vector3 (0f, yOffset, 0f);
 
 		// Set the laser speed
 		playerLaser.GetComponent<Rigidbody2D> ().velocity = new Vector2(0f, playerLaserSpeed);
+
+		// Play laser sound
+		AudioSource.PlayClipAtPoint (laserSound, transform.position);
 	}
 
 	void OnTriggerEnter2D (Collider2D collider) {
@@ -84,8 +89,12 @@ public class PlayerController : MonoBehaviour {
 		// Handle the hit to know if we die
 		health -= projectile.GetDamage();
 		if (health <= 0) {
-			levelManager.LoadLevel ("Lose");
+			Die ();
 		}
+	}
+
+	void Die () {
+		levelManager.LoadLevel ("Lose");
 	}
 
 }

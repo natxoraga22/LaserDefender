@@ -10,6 +10,9 @@ public class EnemyBehaviour : MonoBehaviour {
 	public float enemyLaserSpeed = 10f;
 	public float enemyLaserFireRate = 0.2f;
 
+	public AudioClip laserSound;
+	public AudioClip deathSound;
+
 	private SpriteRenderer spriteRenderer;
 
 	private ScoreKeeper scoreKeeper;
@@ -33,10 +36,13 @@ public class EnemyBehaviour : MonoBehaviour {
 		// Instantiate the laser
 		GameObject enemyLaser = (GameObject) Instantiate (enemyLaserPrefab, this.transform.position, Quaternion.identity);
 		float yOffset = spriteRenderer.bounds.size.y / 2f + enemyLaser.GetComponent<SpriteRenderer> ().bounds.size.y / 2f;
-		enemyLaser.transform.position += new Vector3 (0f, -yOffset, 2f);	// Enemy projectiles z = 2f
+		enemyLaser.transform.position += new Vector3 (0f, -yOffset, 0f);
 
 		// Set the laser speed
 		enemyLaser.GetComponent<Rigidbody2D> ().velocity = new Vector2(0f, -enemyLaserSpeed);
+
+		// Play laser sound
+		AudioSource.PlayClipAtPoint (laserSound, this.transform.position);
 	}
 
 	void OnTriggerEnter2D (Collider2D collider) {
@@ -53,9 +59,14 @@ public class EnemyBehaviour : MonoBehaviour {
 		// Handle the hit to know if the enemy dies
 		health -= projectile.GetDamage();
 		if (health <= 0) {
-			scoreKeeper.IncrementScore (scoreValue);
-			Destroy (this.gameObject);
+			Die ();
 		}
+	}
+
+	void Die () {
+		AudioSource.PlayClipAtPoint (deathSound, this.transform.position);
+		scoreKeeper.IncrementScore (scoreValue);
+		Destroy (this.gameObject);
 	}
 
 }
