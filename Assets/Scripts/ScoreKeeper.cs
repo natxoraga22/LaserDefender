@@ -4,7 +4,7 @@ using System.Collections;
 
 public class ScoreKeeper : MonoBehaviour {
 
-	private int score = 0;
+	private static int score = 0;
 
 	private Text scoreText;
 
@@ -12,6 +12,10 @@ public class ScoreKeeper : MonoBehaviour {
 	void Start () {
 		scoreText = GetComponent<Text> ();
 		Reset ();
+	}
+
+	public static int GetScore () {
+		return score;
 	}
 
 	public void IncrementScore (int points) {
