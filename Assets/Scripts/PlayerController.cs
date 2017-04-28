@@ -80,9 +80,17 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D (Collider2D collider) {
+		// Projectile?
 		Projectile projectile = collider.gameObject.GetComponent<Projectile> ();
 		if (projectile) {
 			HandleHit (projectile);
+		}
+
+		// Player life?
+		if (collider.gameObject.CompareTag ("PlayerLife")) {
+			if (health < maxHealth) health++;
+			lifeDisplay.UpdateHealth (health);
+			Destroy (collider.gameObject);
 		}
 	}
 
@@ -91,7 +99,7 @@ public class PlayerController : MonoBehaviour {
 
 		// Message the projectile and the UI
 		projectile.Hit ();
-		lifeDisplay.PlayerHit (health);
+		lifeDisplay.UpdateHealth (health);
 
 		// Handle the hit to know if we die
 		if (health <= 0) {

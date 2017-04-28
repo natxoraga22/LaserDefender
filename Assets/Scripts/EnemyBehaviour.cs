@@ -4,11 +4,15 @@ using System.Collections;
 public class EnemyBehaviour : MonoBehaviour {
 
 	public GameObject enemyLaserPrefab;
+	public GameObject playerLifePrefab;
 
 	public int health = 1;
 	public int scoreValue = 100;
 	public float enemyLaserSpeed = 10f;
 	public float enemyLaserFireRate = 0.2f;
+
+	public float powerUpSpeed = 5f;
+	public float powerUpProbability = 0.05f;
 
 	public AudioClip laserSound;
 	public AudioClip deathSound;
@@ -64,9 +68,18 @@ public class EnemyBehaviour : MonoBehaviour {
 	}
 
 	void Die () {
+		// Drop a life sometimes
+		if (Random.value <= powerUpProbability) DropLife ();
+
+		// Play sound, increment score and destroy the enemy
 		AudioSource.PlayClipAtPoint (deathSound, this.transform.position);
 		scoreKeeper.IncrementScore (scoreValue);
 		Destroy (this.gameObject);
+	}
+
+	void DropLife () {
+		GameObject playerLife = (GameObject) Instantiate (playerLifePrefab, this.transform.position, Quaternion.identity);
+		playerLife.GetComponent<Rigidbody2D> ().velocity = new Vector2(0f, -powerUpSpeed);
 	}
 
 }
