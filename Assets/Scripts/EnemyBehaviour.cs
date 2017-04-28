@@ -13,14 +13,14 @@ public class EnemyBehaviour : MonoBehaviour {
 	public AudioClip laserSound;
 	public AudioClip deathSound;
 
-	private SpriteRenderer spriteRenderer;
-
 	private ScoreKeeper scoreKeeper;
+
+	private SpriteRenderer spriteRenderer;
 
 
 	void Start () {
-		spriteRenderer = GetComponent<SpriteRenderer> ();
 		scoreKeeper = GameObject.FindObjectOfType<ScoreKeeper> ();
+		spriteRenderer = GetComponent<SpriteRenderer> ();
 	}
 
 	void Update () {

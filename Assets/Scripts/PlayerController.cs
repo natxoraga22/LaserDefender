@@ -5,7 +5,8 @@ public class PlayerController : MonoBehaviour {
 
 	public GameObject playerLaserPrefab;
 
-	public int health = 3;
+	public int maxHealth = 3;
+	private int health;	// = maxHealth
 	public float playerSpeed = 12f;
 	public float playerLaserSpeed = 20f;
 	public float playerLaserFireRate = 0.2f;
@@ -13,6 +14,7 @@ public class PlayerController : MonoBehaviour {
 	public AudioClip laserSound;
 
 	private LevelManager levelManager;
+	private LifeDisplay lifeDisplay;
 
 	private SpriteRenderer spriteRenderer;
 	private float minXPosition;
@@ -20,7 +22,9 @@ public class PlayerController : MonoBehaviour {
 
 
 	void Start () {
+		health = maxHealth;
 		levelManager = GameObject.FindObjectOfType<LevelManager> ();
+		lifeDisplay = GameObject.FindObjectOfType<LifeDisplay> ();
 		spriteRenderer = GetComponent<SpriteRenderer> ();
 		ComputeXPositionLimits ();
 	}
@@ -83,11 +87,13 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	void HandleHit (Projectile projectile) {
-		// Message the projectile
+		health -= projectile.GetDamage();
+
+		// Message the projectile and the UI
 		projectile.Hit ();
+		lifeDisplay.PlayerHit (health);
 
 		// Handle the hit to know if we die
-		health -= projectile.GetDamage();
 		if (health <= 0) {
 			Die ();
 		}
