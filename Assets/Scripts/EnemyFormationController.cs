@@ -3,10 +3,16 @@ using System.Collections;
 
 public class EnemyFormationController : MonoBehaviour {
 
-	public GameObject blackEnemyPrefab;
+	// Enemy types and probabilities
+	public GameObject[] enemyPrefabs;
+	public float[] enemyTypeInitialProbs;
+	public float[] enemyTypeFinalProbs;
+	private float[] enemyTypeProbs;
+	private float[] enemyTypeProbsIncrements;
+	public int wavesToFinalProbs;
+	private int currentWave = 0;
 
 	public float formationSpeed = 2f;
-	public float delayBetweenSpawns = 0.5f;
 
 	private bool isMovingLeft = true;
 	private float minXPosition;
@@ -14,14 +20,49 @@ public class EnemyFormationController : MonoBehaviour {
 
 
 	void Start () {
+		ComputeSpawningProbabilities ();
+
+		// First enemies
 		SpawnFullFormation ();
 	}
 
-	void SpawnFullFormation () {
-		foreach (Transform child in this.transform) {
-			Instantiate (blackEnemyPrefab, child.position, Quaternion.identity, child);
+	void ComputeSpawningProbabilities () {
+		enemyTypeProbs = (float[]) enemyTypeInitialProbs.Clone ();
+		enemyTypeProbsIncrements = new float[enemyTypeInitialProbs.Length];
+		for (int i = 0; i < enemyTypeInitialProbs.Length; i++) {
+			enemyTypeProbsIncrements [i] = (enemyTypeFinalProbs [i] - enemyTypeInitialProbs [i]) / wavesToFinalProbs;
 		}
+	}
+
+	void SpawnFullFormation () {
+		// Spawning
+		foreach (Transform child in this.transform) {
+			int enemyIndex = GetRandomEnemyIndex ();
+			Instantiate (enemyPrefabs[enemyIndex], child.position, Quaternion.identity, child);
+		}
+		// Changing probabilities
+		currentWave++;
+		if (currentWave <= wavesToFinalProbs) IncrementSpawningProbabilities ();
+		else if (currentWave == wavesToFinalProbs + 1) enemyTypeProbs = (float[]) enemyTypeFinalProbs.Clone ();
+
+		// Computing formation limits
 		ComputeXPositionLimits ();	// Needs spawned enemies!!
+	}
+
+	int GetRandomEnemyIndex () {
+		float randomPoint = Random.value;
+
+		for (int i = 0; i < enemyTypeProbs.Length; i++) {
+			if (randomPoint < enemyTypeProbs[i]) return i;
+			else randomPoint -= enemyTypeProbs[i];
+		}
+		return enemyTypeProbs.Length - 1;
+	}
+
+	void IncrementSpawningProbabilities () {
+		for (int i = 0; i < enemyTypeProbs.Length; i++) {
+			enemyTypeProbs [i] += enemyTypeProbsIncrements [i];
+		}
 	}
 
 	void ComputeXPositionLimits () {
@@ -63,7 +104,7 @@ public class EnemyFormationController : MonoBehaviour {
 		UpdateFormationPosition ();
 
 		if (AllMembersAreDead ()) {
-			SpawnUntilFormationIsFull ();
+			SpawnFullFormation ();
 		}
 	}
 
@@ -89,25 +130,6 @@ public class EnemyFormationController : MonoBehaviour {
 			if (enemyPosition.childCount > 0) return false;
 		}
 		return true;
-	}
-
-	void SpawnUntilFormationIsFull () {
-		Transform freePosition = GetNextFreePosition ();
-		if (freePosition) {
-			Instantiate (blackEnemyPrefab, freePosition.position, Quaternion.identity, freePosition);
-			ComputeXPositionLimits ();	// Needs spawned enemies!!
-		}
-		if (GetNextFreePosition ()) {
-			Invoke ("SpawnUntilFormationIsFull", delayBetweenSpawns);
-		}
-	}
-
-	// TODO The next free position should be random!!
-	Transform GetNextFreePosition () {
-		foreach (Transform enemyPosition in this.transform) {
-			if (enemyPosition.childCount == 0) return enemyPosition;
-		}
-		return null;
 	}
 
 }
